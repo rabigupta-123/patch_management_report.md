@@ -1,0 +1,46 @@
+name: Validate Report & Repository Standards
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Verify Documentation & Assets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Verify Required Deliverables
+        run: |
+          echo "Checking repository structure and critical deliverables..."
+          test -f patch_management_report.md || { echo "::error::patch_management_report.md not found"; exit 1; }
+          test -f README.md || { echo "::error::README.md not found"; exit 1; }
+          test -f assets/patch_management_lifecycle.png || { echo "::error::Banner asset missing"; exit 1; }
+          echo "All required files are present and properly structured."
+
+      - name: Verify Markdown File Integrity
+        run: |
+          echo "Verifying markdown file integrity..."
+          REPORT_LINES=$(wc -l < patch_management_report.md)
+          README_LINES=$(wc -l < README.md)
+          echo "patch_management_report.md line count: $REPORT_LINES"
+          echo "README.md line count: $README_LINES"
+          
+          if [ "$REPORT_LINES" -lt 100 ]; then
+            echo "::error::patch_management_report.md appears truncated"
+            exit 1
+          fi
+
+      - name: Report Validation Summary
+        run: |
+          echo "=========================================="
+          echo "  Repository Standards Validation Passed  "
+          echo "  Author: Rabi Kumar Gupta                "
+          echo "  Task: Week 6 Patch Management Report    "
+          echo "=========================================="
